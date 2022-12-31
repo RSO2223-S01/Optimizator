@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: optimizator-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: optimizator
+  template:
+    metadata:
+      labels:
+        app: optimizator
+    spec:
+      containers:
+        - image: rso2223s01/optimizator:latest
+          name: optimizator
+          env:
+            - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
+              value: jdbc:postgresql://peanut.db.elephantsql.com:5432/rozavelh
+            - name: KUMULUZEE_DATASOURCES0_USERNAME
+              value: rozavelh
+            - name: KUMULUZEE_DATASOURCES0_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pg-optimizator-pass
+                  key: KUMULUZEE_DATASOURCES0_PASSWORD
+          ports:
+            - containerPort: 8080
+              name: server
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: server
+            initialDelaySeconds: 20
+            periodSeconds: 3
+          readinessProbe:
+              httpGet:
+                path: /health/ready
+                port: server
+              initialDelaySeconds: 20
+              periodSeconds: 3
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: optimizator
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: server
+  selector:
+    app: optimizator
