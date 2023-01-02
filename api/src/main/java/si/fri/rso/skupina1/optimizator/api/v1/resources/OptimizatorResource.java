@@ -116,7 +116,7 @@ public class OptimizatorResource {
 				}
 				""";
 		String res = executePOST(graphQLquery, baseUrlOrders);
-		// log.info("ORDERS: >>> " + res + "<<<");
+		log.info("Open orders: " + res);
 		JSONObject responseDataJSON = new JSONObject(res).getJSONObject("data");
 		JSONArray ordersJSON = responseDataJSON.getJSONObject("allOrders").getJSONArray("result");
 		// log.info("Order array" + ordersJSON.toString());
@@ -132,7 +132,7 @@ public class OptimizatorResource {
 				}
 				""".replace("%id", "" + userId);
 		res = executePOST(graphQLquery, baseUrlUsers);
-		// log.info("USER ADDRESS: >>> " + res + "<<<");
+		log.info("USER ADDRESS: >>> " + res + "<<<");
 		responseDataJSON = new JSONObject(res).getJSONObject("data");
 		JSONArray usersJSON = responseDataJSON.getJSONObject("allUsers").getJSONArray("result");
 		JSONObject userJSON = usersJSON.getJSONObject(0);
@@ -177,11 +177,21 @@ public class OptimizatorResource {
 							}
 							""".replace("%id", "" + userId);
 					final String response2 = executePOST(graphQLquery2, baseUrlOrders);
-					// log.info(response2);
+					log.info(response2);
 					JSONArray userOrders = new JSONObject(response2).getJSONObject("data").getJSONObject("allOrders")
 							.getJSONArray("result");
-					Double average = userOrders.toList().stream().map(x -> ((JSONObject) x))
-							.collect(Collectors.averagingDouble(x -> x.getLong("clientRating")));
+					double average = 0;
+					int count = 0;
+					for (int i = 0; i < userOrders.length(); i++) {
+						try {
+							Double d = ordersJSON.getJSONObject(i).getDouble("clientScore");
+							average += d;
+							count++;
+						} catch (Exception e) {
+						}
+					}
+					if (count > 0)
+						average /= count;
 					// log.info("" + average);
 					if (average >= minRating_)
 						finalOrders.add(order);
