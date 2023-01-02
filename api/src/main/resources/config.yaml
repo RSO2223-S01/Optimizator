@@ -13,7 +13,7 @@ kumuluzee:
       mapping: /openapi-spec
     scan:
       packages: si.fri.rso.skupina1.optimizator.api.v1
-    servers: http://localhost:8080/v1
+    servers: http://localhost:8080
     ui:
       mapping: /openapi
       server-auto-config:
@@ -22,8 +22,6 @@ kumuluzee:
   health:
     checks:
       http-health-check:
-        - connection-url: http://localhost:8080/v1/users
-          type: readyness
         - connection-url: http://localhost:8080/openapi
           type: readyness
   logs:
