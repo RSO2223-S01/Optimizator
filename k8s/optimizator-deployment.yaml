@@ -16,28 +16,29 @@ spec:
         - image: rso2223s01/optimizator:latest
           name: optimizator
           env:
-            - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
-              value: jdbc:postgresql://peanut.db.elephantsql.com:5432/rozavelh
-            - name: KUMULUZEE_DATASOURCES0_USERNAME
-              value: rozavelh
-            - name: KUMULUZEE_DATASOURCES0_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: pg-optimizator-pass
-                  key: KUMULUZEE_DATASOURCES0_PASSWORD
+            - name: KUMULUZEE_SERVER_CONTEXTPATH
+              value: /optimize
+            - name: KUMULUZEE_HEALTH_CHECKS_HTTPHEALTHCHECK0_CONNECTIONURL
+              value: http://localhost:8080/optimize/openapi
+            - name: INTEGRATIONS_UPORABNIKI_BASEURL
+              value: http://uporabniki:8080/users/graphql
+            - name: INTEGRATIONS_NAROCILA_BASEURL
+              value: http://narocila:8080/orders/graphql
+            - name: KUMULUZEE_CONFIG_CONSUL_AGENT
+              value: http://consul:8500
           ports:
             - containerPort: 8080
               name: server
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /health/live
+              path: /optimize/health/live
               port: server
             initialDelaySeconds: 20
             periodSeconds: 3
           readinessProbe:
               httpGet:
-                path: /health/ready
+                path: /optimize/health/ready
                 port: server
               initialDelaySeconds: 20
               periodSeconds: 3
